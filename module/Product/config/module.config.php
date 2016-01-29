@@ -1,4 +1,6 @@
 <?php
+namespace Product;
+
 return array(
 		//Definition of module's controllers
 		'controllers' => array(
@@ -36,7 +38,7 @@ return array(
 						),
 				),
 				 
-				// Lasciamo invariata questa chiave (orm_default), è utilizzata dalla CLI
+				// Lasciamo invariata questa chiave (orm_default), ï¿½ utilizzata dalla CLI
 				'orm_another' => array(
 						'class'   => 'Doctrine\ORM\Mapping\Driver\DriverChain',
 						'drivers' => array(

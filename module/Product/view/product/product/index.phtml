@@ -1,0 +1,30 @@
+<?php 
+
+$name = 'My products';
+$this->headTitle($name);
+?>
+<h1>
+	<?php echo $this->escapeHtml($name); ?>
+</h1>
+<p>
+	<a href="<?php echo $this->url('product', array('action'=>'add'));?>">Add
+		new product</a>
+</p>
+
+<table class="table">
+	<tr>
+		<th>Title</th>
+		<th>Artist</th>
+		<th>&nbsp;</th>
+	</tr>
+	<?php foreach ($products as $product) : ?>
+	<tr>
+		<td><?php echo $this->escapeHtml($product->getTitle());?></td>
+		<td><?php echo $this->escapeHtml($product->getArtist());?></td>
+		<td><a
+			href="<?php echo $this->url('product', array('action'=>'edit', 'id' => $product->getId()));?>">Edit</a> <a
+			href="<?php echo $this->url('product', array('action'=>'delete', 'id' => $product->getId()));?>">Delete</a>
+		</td>
+	</tr>
+	<?php endforeach; ?>
+</table>
