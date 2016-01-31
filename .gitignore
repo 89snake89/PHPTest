@@ -9,3 +9,6 @@ nbproject
 .settings
 vendor
 composer.phar
+/bootstrap.php
+/cli-config.php
+/composer.lock

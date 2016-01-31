@@ -1,0 +1,22 @@
+<?php
+echo $this->headScript()->appendFile($this->basePath('/js/jquery.tagsinput.min.js'));
+echo $this->headScript()->appendFile($this->basePath('/js/tagsfunction.js'));
+$this->headLink()->appendStylesheet('/css/jquery.tagsinput.min.css');
+
+$title = 'Create new product';
+$this->headTitle($title);
+?>
+<h1>
+	<?php echo $this->escapeHtml($title); ?>
+</h1>
+<?php
+$form->setAttribute('action', $this->url('product', array('action' => 'create')));
+$form->prepare();
+echo $this->form()->openTag($form);
+echo $this->formHidden($form->get('id'));
+echo $this->formRow($form->get('name'));
+echo $this->formRow($form->get('description'));
+echo $this->formRow($form->get('image'));
+echo $this->formRow($form->get('tags'));
+echo $this->formSubmit($form->get('submit'));
+echo $this->form()->closeTag();
