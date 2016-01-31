@@ -14,7 +14,7 @@ return array(
 						'product' => array(
 								'type'    => 'segment',
 								'options' => array(
-										'route'    => '/product[/][:id][/:action]',
+										'route'    => '/product[/:id][/:action]',
 										'constraints' => array(
 												'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
 												'id'     => '[0-9]+',
@@ -38,7 +38,6 @@ return array(
 						),
 				),
 				 
-				// Lasciamo invariata questa chiave (orm_default), � utilizzata dalla CLI
 				'orm_another' => array(
 						'class'   => 'Doctrine\ORM\Mapping\Driver\DriverChain',
 						'drivers' => array(
