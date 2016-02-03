@@ -23,6 +23,7 @@ class ProductController extends AbstractActionController
 		$em = $this->getServiceLocator()->get('doctrine.entitymanager.orm_another');
 	
 		$products = $em->getRepository("Product\Entity\Product")->findAll();
+		
 		return new ViewModel(array(
 				'products' => $products,
 		));
