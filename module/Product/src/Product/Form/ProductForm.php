@@ -2,6 +2,8 @@
 namespace Product\Form;
 
 use Zend\Form\Form;
+use Zend\InputFilter\File;
+use Zend\Form\Element;
 
 class ProductForm extends Form
 {
@@ -27,19 +29,18 @@ class ProductForm extends Form
 						'label' => 'Description',
 				),
 		));
-		$this->add(array(
-				'name' => 'image',
-				'attributes' => array(
-						'type'  => 'file',
-				),
-				'options' => array(
-						'label' => 'Image',
-				),
-		));
+
+		// File Input
+		$file = new Element\File('image');
+		$file->setLabel('Image')
+		->setAttribute('id', 'image-file');
+		$this->add($file);
+		
 		$this->add(array(
 				'name' => 'tags',
 				'type' => 'Hidden',
 				'attributes' => array(
+						'required' => 'required',
 						'id'   => 'tags-input'
 				),
 		));

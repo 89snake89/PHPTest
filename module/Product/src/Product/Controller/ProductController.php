@@ -5,6 +5,7 @@ use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 use Product\Form\ProductForm;
 use Product\Entity\Product;
+use Zend\Validator\File\Size;
 
 class ProductController extends AbstractActionController
 {
@@ -12,7 +13,7 @@ class ProductController extends AbstractActionController
 		$em = $this->getServiceLocator()->get('doctrine.entitymanager.orm_another');
 	
 		$products = $em->getRepository("Product\Entity\Product")->findAll();
-		
+
 		return new ViewModel(array(
 				'products' => $products,
 		));
@@ -34,12 +35,37 @@ class ProductController extends AbstractActionController
 		$request = $this->getRequest();
 		if ($request->isPost()) {
 			$em = $this->getServiceLocator()->get('doctrine.entitymanager.orm_another');
-			$product = new Product();
+			
+			$productEntity = new Product();
+			$product = new \Product\Model\Product();
+			$form->setInputFilter($product->getInputFilter());
+			
+			$File    = $this->params()->fromFiles('image');
+			
 			$form->setData($request->getPost());
-			//TODO Da salvare i tags.
+			
 			if ($form->isValid()) {
-				$product->exchangeArray($form->getData());
-				$em->persist($product);
+				$size = new Size(array('max'=>2000000, 'min' => 1)); //max bytes filesize 2MB
+				$adapter = new \Zend\File\Transfer\Adapter\Http();
+				$adapter->setValidators(array($size), $File['name']);
+				
+				if (!$adapter->isValid()){
+					$dataError = $adapter->getMessages();
+					var_dump($dataError);die();
+					$error = array();
+					foreach($dataError as $key=>$row){
+						$error[] = $row;
+					} //set formElementErrors
+					$form->setMessages(array('image'=>$error ));
+				} else {
+					$adapter->setDestination('public/img/product');
+					$adapter->receive($File['name']);
+					$this->generateAndSaveThumbImage($adapter->getFileName(), $adapter->getFileName(null, false));
+				}
+				
+				$productEntity->exchangeArray($form->getData());
+				$productEntity->setCreationdate(new \DateTime());
+				$em->persist($productEntity);
 				$em->flush();
 				return $this->redirect()->toRoute('product');
 			}
@@ -58,6 +84,8 @@ class ProductController extends AbstractActionController
 		
 		try {
 			$product = $em->getRepository("Product\Entity\Product")->find($id);
+			$productModel = new \Product\Model\Product();
+			$productModel->exchangeProductEntity($product);
 		}
 		catch (\Exception $ex) {
 			return $this->redirect()->toRoute('product', array(
@@ -65,7 +93,7 @@ class ProductController extends AbstractActionController
 			));
 		}
 		$form  = new ProductForm();
-		$form->bind($product);
+		$form->bind($productModel);
 		$form->get('submit')->setAttribute('value', 'Edit');
 		
 		$request = $this->getRequest();
@@ -85,5 +113,12 @@ class ProductController extends AbstractActionController
 				'id' => $id,
 				'form' => $form
 		);
+	}
+	
+	private function generateAndSaveThumbImage($imagePath, $imageName){
+		$thumbnailer = $this->getServiceLocator()->get('WebinoImageThumb');
+		$thumb = $thumbnailer->create($imagePath, $options = array(), $plugins = array());
+		$thumb->resize(100, 100);
+		$thumb->save('public/img/product/thumb/' . $imageName);
 	}
 }

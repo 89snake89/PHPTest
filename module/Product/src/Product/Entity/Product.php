@@ -128,5 +128,16 @@ class Product
     public function setCreationdate($newCreationdate){
     	$this->creationdate = $newCreationdate;
     }
+    
+    public function exchangeArray($data){
+    	$this->id     = (!empty($data['id'])) ? $data['id'] : null;
+    	$this->name = (!empty($data['name'])) ? $data['name'] : null;
+    	$this->description  = (!empty($data['description'])) ? $data['description'] : null;
+    	$this->image  = (!empty($data['image'])) ? $data['image'] : null;
+    }
+    
+    public function getFormattedDate(){
+    	
+    }
 }
 
