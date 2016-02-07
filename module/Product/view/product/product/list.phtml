@@ -21,7 +21,13 @@ $this->headTitle($name);
 	</tr>
 	<?php foreach ($products as $product) { ?>
 	<tr>
-		<td><img alt="<?php echo $this->escapeHtml($product->getImage());?>" src="/img/product/thumb/<?php echo $this->escapeHtml($product->getImage());?>"></td>
+		<td>
+		<?php if($product->getImage() == null) {?>
+			<img alt="Product image" src="/img/product/thumb/default_product.jpg">
+		<?php }else{ ?>
+			<img alt="<?php echo $this->escapeHtml($product->getImage());?>" src="/img/product/thumb/<?php echo $this->escapeHtml($product->getImage());?>">
+		<?php }?>
+		</td>
 		<td><?php echo $this->escapeHtml($product->getName());?></td>
 		<td><?php echo $this->escapeHtml($product->getDescription());?></td>
 		<td><?php echo $product->getCreationdate()->format('Y-m-d H:i:s'); ?></td>
