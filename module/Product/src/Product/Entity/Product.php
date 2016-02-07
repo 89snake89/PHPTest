@@ -50,6 +50,28 @@ class Product
     private $creationdate;
 
     /**
+     * @var \Doctrine\Common\Collections\Collection
+     *
+     * @ORM\ManyToMany(targetEntity="Product\Entity\Tags", inversedBy="idProduct")
+     * @ORM\JoinTable(name="product_tags",
+     *   joinColumns={
+     *     @ORM\JoinColumn(name="id_product", referencedColumnName="id")
+     *   },
+     *   inverseJoinColumns={
+     *     @ORM\JoinColumn(name="id_tag", referencedColumnName="id")
+     *   }
+     * )
+     */
+    private $idTag;
+
+    /**
+     * Constructor
+     */
+    public function __construct(){
+        $this->idTag = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+    
+    /**
      * Get Id method
      * @return number
      */
@@ -129,6 +151,22 @@ class Product
     	$this->creationdate = $newCreationdate;
     }
     
+    /**
+     * Get idTags method
+     * @return \Doctrine\Common\Collections\ArrayCollection
+     */
+    public function getIdTag(){
+    	return $this->idTag;
+    }
+    
+    /**
+     * Setter method for idTag
+     * @param \Doctrine\Common\Collections\ArrayCollection $idProduct
+     */
+    public function setIdTag($idTag){
+    	$this->idTag = $idTag;
+    }
+    
     public function exchangeArray($data){
     	$this->id     = (!empty($data['id'])) ? $data['id'] : null;
     	$this->name = (!empty($data['name'])) ? $data['name'] : null;
@@ -137,7 +175,8 @@ class Product
     }
     
     public function getFormattedDate(){
-    	
+    	 
     }
+
 }
 

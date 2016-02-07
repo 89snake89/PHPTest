@@ -6,6 +6,7 @@ use Zend\View\Model\ViewModel;
 use Product\Form\ProductForm;
 use Product\Entity\Product;
 use Zend\Validator\File\Size;
+use Product\Entity\Tags;
 
 class ProductController extends AbstractActionController
 {
@@ -52,7 +53,7 @@ class ProductController extends AbstractActionController
 				
 				if (!$adapter->isValid()){
 					$dataError = $adapter->getMessages();
-					var_dump($dataError);die();
+					
 					$error = array();
 					foreach($dataError as $key=>$row){
 						$error[] = $row;
@@ -63,7 +64,13 @@ class ProductController extends AbstractActionController
 					$adapter->receive($File['name']);
 					$this->generateAndSaveThumbImage($adapter->getFileName(), $adapter->getFileName(null, false));
 				}
-				
+				$tagsArray = explode(",", $form->getData()["tags"]);
+				foreach ($tagsArray as $tag) {
+					$entityTag = new Tags();
+					$entityTag->setName($tag);
+					$productEntity->getIdTag()->add($entityTag);
+					$em->persist($entityTag);
+				}
 				$productEntity->exchangeArray($form->getData());
 				$productEntity->setCreationdate(new \DateTime());
 				$em->persist($productEntity);

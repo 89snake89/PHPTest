@@ -29,6 +29,20 @@ class Tags
     private $name = '0';
 
     /**
+     * @var \Doctrine\Common\Collections\Collection
+     *
+     * @ORM\ManyToMany(targetEntity="Product\Entity\Product", mappedBy="idTag")
+     */
+    private $idProduct;
+
+    /**
+     * Constructor
+     */
+    public function __construct(){
+        $this->idProduct = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+    
+    /**
      * Get Id method
      * @return number
      */
@@ -58,6 +72,22 @@ class Tags
      */
     public function setName($newName){
     	$this->name = $newName;
+    }
+    
+    /**
+     * Get idProduct method
+     * @return \Doctrine\Common\Collections\ArrayCollection
+     */
+    public function getIdProduct(){
+    	return $this->idProduct;
+    }
+    
+    /**
+     * Setter method for idProduct
+     * @param \Doctrine\Common\Collections\ArrayCollection $idProduct
+     */
+    public function setIdProduct($idProduct){
+    	$this->idProduct = $idProduct;
     }
 
 }
