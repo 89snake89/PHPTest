@@ -47,23 +47,7 @@ class ProductController extends AbstractActionController
 			$form->setData($request->getPost());
 			
 			if ($form->isValid()) {
-				$size = new Size(array('max'=>2000000, 'min' => 1)); //max bytes filesize 2MB
-				$adapter = new \Zend\File\Transfer\Adapter\Http();
-				$adapter->setValidators(array($size), $File['name']);
-				
-				if (!$adapter->isValid()){
-					$dataError = $adapter->getMessages();
-					
-					$error = array();
-					foreach($dataError as $key=>$row){
-						$error[] = $row;
-					} //set formElementErrors
-					$form->setMessages(array('image'=>$error ));
-				} else {
-					$adapter->setDestination('public/img/product');
-					$adapter->receive($File['name']);
-					$this->generateAndSaveThumbImage($adapter->getFileName(), $adapter->getFileName(null, false));
-				}
+				$this->saveImage ($form, $dataError, $error);
 				$tagsArray = explode(",", $form->getData()["tags"]);
 				foreach ($tagsArray as $tag) {
 					$entityTag = new Tags();
@@ -73,6 +57,7 @@ class ProductController extends AbstractActionController
 				}
 				$productEntity->exchangeArray($form->getData());
 				$productEntity->setCreationdate(new \DateTime());
+				$productEntity->setImage($adapter->getFileName(null, false));
 				$em->persist($productEntity);
 				$em->flush();
 				return $this->redirect()->toRoute('product');
@@ -94,33 +79,84 @@ class ProductController extends AbstractActionController
 			$product = $em->getRepository("Product\Entity\Product")->find($id);
 			$productModel = new \Product\Model\Product();
 			$productModel->exchangeProductEntity($product);
+			$tag = new Tags();
+			
+			foreach ($product->getIdTag() as $tag){
+				$tagArrayName[] = $tag->getName();
+			}
+			$productModel->tags = implode(",", $tagArrayName);
 		}
 		catch (\Exception $ex) {
 			return $this->redirect()->toRoute('product', array(
 					'action' => 'list'
 			));
 		}
+		
 		$form  = new ProductForm();
 		$form->bind($productModel);
 		$form->get('submit')->setAttribute('value', 'Edit');
 		
 		$request = $this->getRequest();
 		if ($request->isPost()) {
-			$em = $this->getServiceLocator()->get('doctrine.entitymanager.orm_another');
-			$product = new Product();
 			$form->setData($request->getPost());
-			//TODO Da salvare i tags.
+			
 			if ($form->isValid()) {
 				$product->exchangeArray($form->getData());
-				$em->persist($product);
+				$this->deleteImage($product->getImage());
+				$this->saveImage ($form, $dataError, $error);
+				foreach ($product->getIdTag() as $tag){
+					$em->remove($tag);
+				}
+				$tagsArray = explode(",", $form->getData()["tags"]);
+				foreach ($tagsArray as $tag) {
+					$entityTag = new Tags();
+					$entityTag->setName($tag);
+					$productEntity->getIdTag()->add($entityTag);
+					$em->persist($entityTag);
+				}
+				
+				$em->persist($product); 
 				$em->flush();
 				return $this->redirect()->toRoute('product');
 			}
 		}
-		return array(
+		
+		return array (
 				'id' => $id,
-				'form' => $form
+				'form' => $form 
 		);
+	}
+	
+	/**
+	 * Save image method
+	 * 
+	 * @param form
+	 * @param dataError
+	 * @param error
+	 */
+	private function saveImage($form, $dataError, $error) {
+		$size = new Size ( array (
+				'max' => 2000000,
+				'min' => 1 
+		) ); // max bytes filesize 2MB
+		$adapter = new \Zend\File\Transfer\Adapter\Http ();
+		$adapter->setValidators (array($size), $File ['name']);
+		
+		if (!$adapter->isValid ()) {
+			$dataError = $adapter->getMessages ();
+			
+			$error = array ();
+			foreach ( $dataError as $key => $row ) {
+				$error [] = $row;
+			} // set formElementErrors
+			$form->setMessages ( array (
+					'image' => $error 
+			) );
+		} else {
+			$adapter->setDestination ( 'public/img/product' );
+			$adapter->receive ( $File ['name'] );
+			$this->generateAndSaveThumbImage ( $adapter->getFileName (), $adapter->getFileName ( null, false ) );
+		}
 	}
 	
 	private function generateAndSaveThumbImage($imagePath, $imageName){
@@ -128,5 +164,10 @@ class ProductController extends AbstractActionController
 		$thumb = $thumbnailer->create($imagePath, $options = array(), $plugins = array());
 		$thumb->resize(100, 100);
 		$thumb->save('public/img/product/thumb/' . $imageName);
+	}
+	
+	private function deleteImage($imageName){
+		unlink('public/img/product/' . $imageName);
+		unlink('public/img/product/thumb/' . $imageName);
 	}
 }
