@@ -42,12 +42,14 @@ class ProductController extends AbstractActionController
 			$product = new \Product\Model\Product();
 			$form->setInputFilter($product->getInputFilter());
 			
-			$File    = $this->params()->fromFiles('image');
+			$File = $this->params()->fromFiles('image');
 			
 			$form->setData($request->getPost());
 			
 			if ($form->isValid()) {
-				$this->saveImage ($form, $dataError, $error);
+				$adapter = new \Zend\File\Transfer\Adapter\Http();
+				$this->saveImage ($form, $adapter, $File);
+				
 				$tagsArray = explode(",", $form->getData()["tags"]);
 				foreach ($tagsArray as $tag) {
 					$entityTag = new Tags();
@@ -79,12 +81,14 @@ class ProductController extends AbstractActionController
 			$product = $em->getRepository("Product\Entity\Product")->find($id);
 			$productModel = new \Product\Model\Product();
 			$productModel->exchangeProductEntity($product);
+			$oldFileName = $product->getImage();
+			
 			$tag = new Tags();
 			
 			foreach ($product->getIdTag() as $tag){
 				$tagArrayName[] = $tag->getName();
 			}
-			$productModel->tags = implode(",", $tagArrayName);
+			
 		}
 		catch (\Exception $ex) {
 			return $this->redirect()->toRoute('product', array(
@@ -94,24 +98,32 @@ class ProductController extends AbstractActionController
 		
 		$form  = new ProductForm();
 		$form->bind($productModel);
+		$form->get('tags')->setValue(implode(",", $tagArrayName));
 		$form->get('submit')->setAttribute('value', 'Edit');
 		
 		$request = $this->getRequest();
 		if ($request->isPost()) {
+			
+			$form->setInputFilter($productModel->getInputFilter());
 			$form->setData($request->getPost());
 			
 			if ($form->isValid()) {
-				$product->exchangeArray($form->getData());
-				$this->deleteImage($product->getImage());
-				$this->saveImage ($form, $dataError, $error);
+				$File = $this->params()->fromFiles('image');
+				$product->exchangeArray($request->getPost());
+				$adapter = new \Zend\File\Transfer\Adapter\Http();
+				$this->deleteImage($oldFileName);
+				$this->saveImage ($form, $adapter, $File);
+				$product->setImage($adapter->getFileName(null, false));
 				foreach ($product->getIdTag() as $tag){
 					$em->remove($tag);
 				}
-				$tagsArray = explode(",", $form->getData()["tags"]);
+				
+				$tagsArray = explode(",", $form->get("tags")->getValue());
+				
 				foreach ($tagsArray as $tag) {
 					$entityTag = new Tags();
 					$entityTag->setName($tag);
-					$productEntity->getIdTag()->add($entityTag);
+					$product->getIdTag()->add($entityTag);
 					$em->persist($entityTag);
 				}
 				
@@ -119,6 +131,7 @@ class ProductController extends AbstractActionController
 				$em->flush();
 				return $this->redirect()->toRoute('product');
 			}
+			
 		}
 		
 		return array (
@@ -134,27 +147,28 @@ class ProductController extends AbstractActionController
 	 * @param dataError
 	 * @param error
 	 */
-	private function saveImage($form, $dataError, $error) {
+	private function saveImage($form, $adapter, $File) {
+		//TODO Try catch per gestire presistenza del file
 		$size = new Size ( array (
 				'max' => 2000000,
 				'min' => 1 
 		) ); // max bytes filesize 2MB
-		$adapter = new \Zend\File\Transfer\Adapter\Http ();
-		$adapter->setValidators (array($size), $File ['name']);
 		
-		if (!$adapter->isValid ()) {
-			$dataError = $adapter->getMessages ();
+		$adapter->setValidators(array($size), $File['name']);
+
+		if (!$adapter->isValid()) {
+			$dataError = $adapter->getMessages();
 			
-			$error = array ();
-			foreach ( $dataError as $key => $row ) {
-				$error [] = $row;
+			$error = array();
+			foreach($dataError as $key => $row) {
+				$error[] = $row;
 			} // set formElementErrors
-			$form->setMessages ( array (
+			$form->setMessages( array (
 					'image' => $error 
-			) );
+			));
 		} else {
 			$adapter->setDestination ( 'public/img/product' );
-			$adapter->receive ( $File ['name'] );
+			$adapter->receive ($File['name']);
 			$this->generateAndSaveThumbImage ( $adapter->getFileName (), $adapter->getFileName ( null, false ) );
 		}
 	}
@@ -167,7 +181,8 @@ class ProductController extends AbstractActionController
 	}
 	
 	private function deleteImage($imageName){
-		unlink('public/img/product/' . $imageName);
-		unlink('public/img/product/thumb/' . $imageName);
+		//TODO: Controlli esistenza immagine Try catch su file
+		unlink("public/img/product/" . $imageName);
+		unlink("public/img/product/thumb/" . $imageName);
 	}
 }

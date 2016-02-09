@@ -12,6 +12,8 @@ class Product implements InputFilterAwareInterface
 	public $description;
 	public $image;
 	
+	protected $inputFilter;
+	
 	public function getArrayCopy(){
 		return get_object_vars($this);
 	}
@@ -86,5 +88,9 @@ class Product implements InputFilterAwareInterface
 		$this->name = (!empty($data->getName())) ? $data->getName() : null;
 		$this->description  = (!empty($data->getDescription())) ? $data->getDescription() : null;
 		$this->image  = (!empty($data->getImage())) ? $data->getImage() : null;
+	}
+	
+	public function exchangeArray($data){
+		
 	}
 }

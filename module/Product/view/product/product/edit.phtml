@@ -10,7 +10,6 @@ $this->headTitle($title);
 	<?php echo $this->escapeHtml($title); ?>
 </h1>
 <?php
-$form = $this->form;
 $form->setAttribute('action', $this->url('product', array('action' => 'edit', 'id' => $this->id,)));
 $form->prepare();
 echo $this->form()->openTag($form);
