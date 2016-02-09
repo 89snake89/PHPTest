@@ -15,7 +15,6 @@ $this->headTitle($name);
 	<tr>
 		<th>Image</th>
 		<th>Name</th>
-		<th>Descriprion</th>
 		<th>Creation date</th>
 		<th>&nbsp;</th>
 	</tr>
@@ -31,7 +30,6 @@ $this->headTitle($name);
 		</a>
 		</td>
 		<td><?php echo $this->escapeHtml($product->getName());?></td>
-		<td><?php echo $this->escapeHtml($product->getDescription());?></td>
 		<td><?php echo $product->getCreationdate()->format('Y-m-d H:i:s'); ?></td>
 		<td><a
 			href="<?php echo $this->url('product', array('action'=>'edit', 'id' => $product->getId()));?>">Edit</a>
