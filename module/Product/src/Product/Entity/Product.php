@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Product
  *
  * @ORM\Table(name="product")
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Product\Repository\ProductRepository")
  */
 class Product implements InputFilterAwareInterface
 {
