@@ -42,13 +42,7 @@ class ProductController extends AbstractActionController
 	}
 	
 	public function listAction(){
-		$em = $this->getServiceLocator()->get('doctrine.entitymanager.orm_another');
-	
-		$products = $em->getRepository("Product\Entity\Product")->findAll();
-		
-		return new ViewModel(array(
-				'products' => $products,
-		));
+		return $this->indexAction();
 	}
 	
 	public function createAction(){
