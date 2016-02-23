@@ -11,6 +11,19 @@ $this->headTitle($name);
 		new product</a>
 </p>
 
+<?php 
+$searchForm = $this->searchForm;
+$searchForm->setAttribute('action', $this->url(
+		'product',
+		array('action' => 'index')
+));
+$searchForm->prepare();
+echo $this->form()->openTag($searchForm);
+echo $this->formRow($searchForm->get('tag'));
+echo $this->formSubmit($searchForm->get('submit'));
+echo $this->form()->closeTag();
+?>
+
 <table class="table">
 	<tr>
 		<th>Image</th>
