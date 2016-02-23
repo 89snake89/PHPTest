@@ -11,6 +11,7 @@ class Product implements InputFilterAwareInterface
 	public $name;
 	public $description;
 	public $image;
+	public $tags;
 	
 	protected $inputFilter;
 	
@@ -75,6 +76,11 @@ class Product implements InputFilterAwareInterface
 			$inputFilter->add(array(
 					'name'     => 'image',
 					'required' => false
+			));
+			
+			$inputFilter->add(array(
+					'name'     => 'tags',
+					'required' => true
 			));
 	
 			$this->inputFilter = $inputFilter;
