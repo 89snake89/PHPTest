@@ -175,6 +175,7 @@ class Product implements InputFilterAwareInterface
     	$this->name = (!empty($data['name'])) ? $data['name'] : null;
     	$this->description  = (!empty($data['description'])) ? $data['description'] : null;
     	$this->image  = (!empty($data['image'])) ? $data['image'] : null;
+    	$this->creationdate  = ($data['creationdate'] != null) ? $data['creationdate'] : $this->creationdate;
     }
     
     

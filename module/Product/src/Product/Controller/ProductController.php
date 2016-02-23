@@ -7,16 +7,37 @@ use Product\Form\ProductForm;
 use Product\Entity\Product;
 use Zend\Validator\File\Size;
 use Product\Entity\Tags;
+use Product\Form\SearchForm;
 
 class ProductController extends AbstractActionController
 {
 	public function indexAction(){
 		$em = $this->getServiceLocator()->get('doctrine.entitymanager.orm_another');
 	
-		$products = $em->getRepository("Product\Entity\Product")->findAll();
-
+		//Form ricerca prodotti
+		$searchForm = new SearchForm();
+		$searchForm->get('submit')->setValue('Index');
+		
+		$request = $this->getRequest();
+		if($request->isPost()){
+			$postData = $request->getPost();
+			$resultArray = $em->getRepository("Product\Entity\Product")->findByTag($postData["tag"]); 
+			
+			$products = array();
+			
+			foreach ($resultArray as $result){
+				$product = new Product();
+				$product->exchangeArray($result);
+				$products[] = $product;
+			}
+			
+		}else{
+			$products = $em->getRepository("Product\Entity\Product")->findAll();
+		}
+		
 		return new ViewModel(array(
 				'products' => $products,
+				'searchForm' => $searchForm
 		));
 	}
 	
