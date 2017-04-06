@@ -8,3 +8,5 @@ Guida per la configurazione del progetto
 4. Modificare il file  PHPTest/config/autoload/doctrine.local.php.dist.php in doctrine.local.php  ed inserire username e password del proprio DB MySQL.
 5. Creare il database nel proprio server
 6. Accedere ad i vari path product/list, product/add ed product/n/edit
+
+Ciao
